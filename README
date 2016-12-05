@@ -1,0 +1,54 @@
+This is readme file for runing the code.
+The main function is in train.py.
+To train a RBM model, modify the code in main function as follows.
+
+    X, Y = input_data()
+    model = RBM(784, 100, learning_rate=0.1, Gibbs_interations=1, batch_size=30)
+    train_error, validate_error = model.train(X['train'], X['valid'], n_epoch=30)
+    plot_error(train_error, validate_error, 'RBM_error_curves.pdf')
+
+To train an Autoencoder, modify the code in main function as follows.
+
+    X, Y = input_data()
+    model = Autoencoder({'input_dim': 784, 'layers': [(100, sigmoid), (784, sigmoid)], 'random_seed': 1, 'learning_rate': 0.1,
+                         'batch_size': 30})
+    train_error, validate_error = model.train(X['train'], X['train'], X['valid'], X['valid'], n_epoch=50)
+    plot_error(train_error, validate_error, 'autoencoder_error_curve.pdf')
+
+To train a denoising autoencoder, modify the code in main function as follows.
+
+    X, Y = input_data()
+    Y_train = X['train']
+    Y_validate = X['valid']
+    X_train = add_noise(X['train'])
+    X_validate = add_noise(X['valid'])
+    model = Autoencoder({'input_dim': 784, 'layers': [(500, sigmoid), (784, sigmoid)], 'random_seed': 1, 'learning_rate': 0.1, 'batch_size': 30})
+    train_error, validate_error = model.train(X_train, Y_train, X_validate, Y_validate, n_epoch=50)
+    plot_error(train_error, validate_error, 'denoiseing_autoencoder_error_curve_500.pdf')
+
+To train a neural network with pretrained RBM, modify the code in main function as follows.
+
+    RBM = pickle.load(open('model.pkl', 'rb'))
+    model = NN({'input_dim': 784, 'layers': [(100, sigmoid), (10, sigmoid)], 'random_seed': 1, 'learning_rate': 0.1, 'batch_size': 30})
+    model.set_first_layer_weights(RBM['model'].get_first_layer_weights())
+    train_error, validate_error = model.train(X['train'], Y['train'], X['valid'], Y['valid'], n_epoch=100,
+                                        cost_function=sigmoid_cross_entropy_loss, evaluate_function=sigmoid_cross_entropy_loss)
+    plot_error(train_error, validate_error, 'neural_network_error_RBM_init.pdf')
+
+To train a neural network with pretrained autoencoder, modify the code in main function as follows.
+
+    autoencoder = pickle.load(open('autoencoder_model.pkl', 'rb'))
+    model = NN({'input_dim': 784, 'layers': [(100, sigmoid), (10, sigmoid)], 'random_seed': 1, 'learning_rate': 0.1, 'batch_size': 30})
+    model.set_first_layer_weights(autoencoder.get_first_layer_weights())
+    train_error, validate_error = model.train(X['train'], Y['train'], X['valid'], Y['valid'], n_epoch=100,
+                                        cost_function=sigmoid_cross_entropy_loss, evaluate_function=sigmoid_cross_entropy_loss)
+    plot_error(train_error, validate_error, 'neural_network_error_autoencoder_init.pdf')
+
+To train a neural network with pretrained denoising autoencoder, modify the code in main function as follows.
+
+    dautoencoder = pickle.load(open('denoiseing_autoencoder_model.pkl', 'rb'))
+    model = NN({'input_dim': 784, 'layers': [(100, sigmoid), (10, sigmoid)], 'random_seed': 1, 'learning_rate': 0.1, 'batch_size': 30})
+    model.set_first_layer_weights(dautoencoder.get_first_layer_weights())
+    train_error, validate_error = model.train(X['train'], Y['train'], X['valid'], Y['valid'], n_epoch=100,
+                                        cost_function=sigmoid_cross_entropy_loss, evaluate_function=sigmoid_cross_entropy_loss)
+    plot_error(train_error, validate_error, 'neural_network_error_denoising_autoencoder_init.pdf')
